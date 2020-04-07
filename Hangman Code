@@ -1,0 +1,133 @@
+import random
+hangmanpics = [
+'''  O/ 
+ /|  
+ / \ ''',
+'''========''',
+'''      |  
+      |  
+      |  
+      | 
+      |  
+======== ''',
+'''  ====== 
+      |  
+      |  
+      |  
+      |  
+      |  
+======== ''',
+'''  ====== 
+   |  |  
+   O  |  
+      |  
+      |  
+      |  
+======== ''',
+'''  ====== 
+   |  |  
+   O  |  
+   |  |  
+      |  
+      |  
+======== ''',
+'''  ====== 
+   |  |  
+   O  |  
+  /|\ |  
+      |  
+      |  
+======== ''',
+'''  ====== 
+   |  |  
+   O  |  
+  /|\ |  
+  / \ |  
+      |  
+======== ''']
+    
+def displayboard(hangmanpics, incorrectletters, correctletters, secretword):
+    print(hangmanpics[len(incorrectletters)])
+    print()
+    
+    print('Incorrect Letters:',end='')
+    for letter in incorrectletters:
+        print(letter,end='')
+    print()
+    
+    blanks = '*'*len(secretword)
+    
+    for i in range(len(secretword)):
+        if secretword[i] in correctletters:
+            blanks = blanks[:i] + secretword[i] + blanks[i+1:]
+    
+    for letter in blanks:
+        print(letter,end='')
+    print()    
+
+def playerguess(alreadyguessed):
+    while True:
+        print('Guess a letter:')
+        guess = input()
+        guess = guess.lower()
+        if len(guess) != 1:
+            print('Please enter a single letter.')
+        elif guess in alreadyguessed:
+            print('You have already tried that letter. Choose again.')
+        elif guess not in 'abcdefghijklmnopqrstuvwxyz':
+            print('Please enter a Letter.')
+        else:
+            return guess
+
+def playagain():
+    print('Do you want to play again? (Yes or No)')
+    return input().lower().startswith('y')
+
+print('H A N G M A N')
+incorrectletters = ''
+correctletters = ''
+wordlist = open('word_list.txt','r')
+wordlist = wordlist.read().split()
+wordindex = random.randint(0,len(wordlist)-1)
+secretword = wordlist[wordindex]
+gameisdone = False
+
+while True:
+    displayboard(hangmanpics, incorrectletters, correctletters, secretword)
+    
+    guess = playerguess(incorrectletters + correctletters)
+    
+    if guess in secretword:
+        correctletters = correctletters + guess
+        
+        foundallletters = True
+        for i in range(len(secretword)):
+            if secretword[i] not in correctletters:
+                foundallletters = False
+                break
+        if foundallletters:
+            displayboard(hangmanpics, incorrectletters, correctletters, secretword)
+            print('Yes! The answer is ' + secretword + '! You have won!')
+            gameisdone = True
+    else:
+        incorrectletters = incorrectletters + guess
+        
+        if len(incorrectletters)  == len(hangmanpics) -1:
+            displayboard(hangmanpics,incorrectletters,correctletters,secretword)
+            print('You have run out of guesses! After ' + str(len(incorrectletters)) +
+                 ' incorrect guesses and ' + str(len(correctletters)) + ' correct guesses, the word was ' +
+                 secretword + '!')
+            gameisdone = True
+    
+    if gameisdone:
+        if playagain():
+            incorrectletters = ''
+            correctletters = ''
+            gameisdone = False
+            wordlist = open('word_list.txt','r')
+            wordlist = wordlist.read().split()
+            wordindex = random.randint(0,len(wordlist)-1)
+            secretword = wordlist[wordindex]
+        else:
+            wordlist.close()
+            break
